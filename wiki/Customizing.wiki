@@ -16,6 +16,6 @@ commit;
 
 Then just call the datasource by it's name: http://your-db-server:8080/your_dad/gdatasource.get_json?p_datasource_id=emp-names
 
-You can also filter using the Google Query Language: http://your-db-server:8080/your_dad/gdatasource.get_json?p_datasource_id=emp-names&tq=select%20first_name%20where%20last_name%20%3D%20'tiger'
+You can also filter using the Google Query Language: http://your-db-server:8080/your_dad/gdatasource.get_json?p_datasource_id=emp-names&tq=select%20first_name%20where%20last_name%20%3D%20%22tiger%22
 
-Here we encoded tq with the encodeURIComponent() javascript function. tq actually is "select first_name where last_name = 'tiger'"
+Here we encoded tq with the encodeURIComponent() javascript function. tq actually is: <b>select first_name where last_name = "tiger"</b>
