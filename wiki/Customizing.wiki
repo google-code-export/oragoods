@@ -12,7 +12,10 @@ The schema.sql file creates a table (gdatasources). In order to use your own dat
 <code>
 insert into gdatasources values ('emp-names','select first_name, last_name from hr.employees');
 commit;
+grant select on hr.employees to scott;
 </code>
+
+Don't forget to add the proper privileges if the user your are using is not the owner of the table.
 
 Then just call the datasource by it's name: http://your-db-server:8080/your_dad/gdatasource.get_json?p_datasource_id=emp-names
 
