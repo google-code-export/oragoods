@@ -1,0 +1,21 @@
+#summary How to create and user your own data sources
+
+= Introduction =
+
+Now have now installed and tested the GDataSource package. You now want to add your own DataSources to query.
+
+
+= Adding your DataSources =
+
+The schema.sql file creates a table (gdatasources). In order to use your own datasources you just need to insert new ones in this table. For example, for a list of employees names:
+
+<code>
+insert into gdatasources values ('emp-names','select first_name, last_name from hr.employees');
+commit;
+</code>
+
+Then just call the datasource by it's name: http://your-db-server:8080/your_dad/gdatasource.get_json?p_datasource_id=emp-names
+
+You can also filter using the Google Query Language: http://your-db-server:8080/your_dad/gdatasource.get_json?p_datasource_id=emp-names&tq=select first_name where last_name = 'tiger'
+
+Of course, calling the URL this way will give you an error, you need to encode it first, but I guess you get the point.
