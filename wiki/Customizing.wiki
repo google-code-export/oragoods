@@ -16,6 +16,6 @@ commit;
 
 Then just call the datasource by it's name: http://your-db-server:8080/your_dad/gdatasource.get_json?p_datasource_id=emp-names
 
-You can also filter using the Google Query Language: http://your-db-server:8080/your_dad/gdatasource.get_json?p_datasource_id=emp-names&tq=select first_name where last_name = 'tiger'
+You can also filter using the Google Query Language: http://your-db-server:8080/your_dad/gdatasource.get_json?p_datasource_id=emp-names&tq=select%20first_name%20where%20last_name%20%3D%20'tiger'
 
-Of course, calling the URL this way will give you an error, you need to encode it first, but I guess you get the point.
+Here we encoded tq with the encodeURIComponent() javascript function. tq actually is "select first_name where last_name = 'tiger'"
