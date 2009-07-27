@@ -3,7 +3,7 @@
 
 = Introduction =
 
-GDataSource is an Oracle PL/SQL implementation of a <a href="http://code.google.com/apis/visualization/documentation/dev/implementing_data_source_overview.html">Google Data Source</a> "server". It implements the <a href="http://code.google.com/apis/visualization/documentation/querylanguage.html">Google Query Language</a>.
+GDataSource is an Oracle PL/SQL implementation of a <a href="http://code.google.com/apis/visualization/documentation/dev/implementing_data_source_overview.html">Google DataSource</a> "server". It implements the <a href="http://code.google.com/apis/visualization/documentation/querylanguage.html">Google Query Language</a>.
 
 
 = Details =
