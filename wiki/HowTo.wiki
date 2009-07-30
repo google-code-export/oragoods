@@ -62,7 +62,7 @@ Here's a detailed note about DBMS_EPG if you have troubles: <a href="http://www.
 
 Now you need to download the source code and install the GDataSource Package on the SCOTT schema.
 
-You can download the latest stable version from the Downloads tab, or you can try the lastest development snapshot. For the latter you'll need a svn command line client client. Just run this to get the source code:
+You can download the latest stable version from the <a href="http://code.google.com/p/oragoods/downloads/list">Downloads tab</a>, or you can try the lastest development snapshot. For the latter you'll need a svn command line client client. Just run this to get the source code:
 
 <code>
 svn checkout http://oragoods.googlecode.com/svn/trunk/ oragoods-read-only
@@ -71,14 +71,17 @@ svn checkout http://oragoods.googlecode.com/svn/trunk/ oragoods-read-only
 Then connect to your database and compile the packages:
 
 <code>
+
 $ sqlplus /nolog
 
 SQL> connect scott/tiger@YOURDB
-Connected.
 
 SQL> @schema.sql
+
 SQL> @gdatasource.pks
+
 SQL> @gdatasource.pkb
+
 
 </code>
 
@@ -93,14 +96,16 @@ The schema.sql creates a table called gdatasources. It has just two columns: 1) 
 The schema.sql already creates one datasource query for testing purpose, which we will use now.
 
 <code>
+
 sqlplus /nolog
 
 SQL> connect scott/tiger@YOURDB
-Connected.
+
 SQL> set serveroutput on
+
 SQL> begin
-  2  gdatasource2.g_debug := true;
-  3  gdatasource2.get_json('test','select *');
+  2  gdatasource.g_debug := true;
+  3  gdatasource.get_json('test','select *');
   4  end;
   5  /
 google.visualization.Query.setResponse(
@@ -128,6 +133,7 @@ rows: [
 )
 
 PL/SQL procedure successfully completed.
+
 </code>
 
 As you can see, this returns a Google DataSource that you can use with the Visualization API for doing charts, printing tables, etc.
