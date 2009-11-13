@@ -1,5 +1,5 @@
 #summary How to install and use ORAGOODS (GDataSource)
-#labels howto,install
+#labels howto,install,Featured,Phase-Deploy
 
 = Introduction =
 
@@ -13,6 +13,8 @@ In order to use GDataSource you need to configure your Oracle Listener to answer
 == Configuring the DBMS_EPG (Embedded PL/SQL Gateway) ==
 
 This code will create a new DAD (Database Access Descriptor) in your Oracle Instance. You need to run this as SYS (I guess any DBA user should work too). We will use user "SCOTT" for the test, but you will probably want to change the DAD's name and URL to something that suit your needs.
+
+Note: watch out for the ? that the wiki adds automatically on the DebugStyle word! Remove it if you are copying and pasting.
 
 <code>
 
