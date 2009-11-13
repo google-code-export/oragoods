@@ -1,4 +1,4 @@
-#summary How to create and user your own data sources
+#summary How to create and use your own data sources
 
 = Introduction =
 
