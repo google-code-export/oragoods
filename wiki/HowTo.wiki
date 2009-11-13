@@ -12,7 +12,7 @@ In order to use GDataSource you need to configure your Oracle Listener to answer
  
 == Configuring the DBMS_EPG (Embedded PL/SQL Gateway) ==
 
-This code will create a new DAD (Database Access Descriptor) in your Oracle Instance. You need to run this as root. We will use user "SCOTT" for the test, but you will probably want to change the DAD's name and URL to something that suit your needs.
+This code will create a new DAD (Database Access Descriptor) in your Oracle Instance. You need to run this as SYS (I guess any DBA user should work too). We will use user "SCOTT" for the test, but you will probably want to change the DAD's name and URL to something that suit your needs.
 
 <code>
 
