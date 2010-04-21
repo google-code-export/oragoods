@@ -73,8 +73,8 @@ AS
 	-- once query is ready, you can print the JSON with the results
 	procedure get_json(
 		p_datasource_id 			IN 			gdatasources.id%type,
-		tq 							IN			varchar2 default null,
-		tqx							IN			varchar2 default 'select *'
+		tq 							IN			varchar2 default 'select *',
+		tqx							IN			varchar2 default NULL
 	);
 	
 	-- print json errors
