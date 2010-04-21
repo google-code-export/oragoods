@@ -1626,8 +1626,8 @@ AS
 	
 	procedure get_json(
 		p_datasource_id 			IN 			gdatasources.id%type,
-		tq 							IN			varchar2 default NULL,
-		tqx							IN			varchar2 default 'select *'
+		tq 							IN			varchar2 default 'select *',
+		tqx							IN			varchar2 default NULL
 	) is
         
         -- datasource query
