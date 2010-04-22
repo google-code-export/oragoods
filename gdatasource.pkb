@@ -87,9 +87,7 @@ AS
 		g_datasource_columns.delete;
 		g_datasource_columns_full.delete;
 		g_datasource_needed_columns.delete;
-		debug('found '||g_datasource_bind_values.count||' binds');
 		g_datasource_bind_values.delete;
-		debug('now there are '||g_datasource_bind_values.count||' binds');
 		g_datasource_bind_types.delete;
 		g_datasource_labels.delete;
 		g_datasource_formats.delete;
@@ -1325,6 +1323,7 @@ AS
 		v_datasource_formats_values	t_varchar2; -- store formats
 		
 		v_buffer			varchar2(32767); -- temporary store translated select clause
+		v_where_buffer		varchar2(32767); -- temporary store the where clause
 		v_select_count		pls_integer;
 		
 		-- limit and offset
@@ -1443,6 +1442,11 @@ AS
 			
 		end loop;
 		
+		-- where clause (process now to add needed columns to the datasource)
+		if length(v_where_clause) is not null and length(v_where_clause) > 0 then
+			processExpression(v_where_clause,v_where_buffer,'where');
+		end if;
+		
 		-- limit
 		if nvl(length(v_limit_clause),0) > 0 then
 			begin
@@ -1484,8 +1488,7 @@ AS
 		
 		-- where clause
 		if length(v_where_clause) is not null and length(v_where_clause) > 0 then
-			v_parsed_query := v_parsed_query || chr(10) || ' where ';
-			processExpression(v_where_clause,v_parsed_query,'where');
+			v_parsed_query := v_parsed_query || chr(10) || ' where ' || v_where_buffer;
 		end if;
 		
 		-- group by clause
@@ -1615,7 +1618,7 @@ AS
 					dbms_sql.bind_variable(
 						p_cursor,
 						':b'||b,											
-						to_number(g_datasource_bind_values(b))
+						g_datasource_bind_values(b)
 					); 
 				else 
 					raise_application_error(-20053,'Invalid bind type detected when parsing query.');
