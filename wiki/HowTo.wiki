@@ -107,7 +107,7 @@ SQL> set serveroutput on
 
 SQL> begin
   2  gdatasource.g_debug := true;
-  3  gdatasource.get_json('test','select *');
+  3  gdatasource.get_json('test','select `*`');
   4  end;
   5  /
 google.visualization.Query.setResponse(
