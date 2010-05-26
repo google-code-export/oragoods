@@ -20,7 +20,7 @@ NOTE: OraGoods doesn't really care of what you insert, it can be any query with 
 
 1) if two or more columns have the same name, use the AS keyword to name them uniquely: select a.id AS myfirstid, b.id AS mysecondid ... ;
 
-2) if your query contains functions then use an inline view to wrap them, ej: select col1, myfunc1 from (select col1, sum(col2) ... );
+2) if your query contains functions then use an inline view to wrap them, ej: select col1, mysum2 from (select col1, sum(col2) AS mysum2 ... );
 ----
 
 Don't forget to grant the proper privileges if the user your are using is not the owner of the tables.
