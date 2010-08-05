@@ -794,15 +794,15 @@ AS
 		v_letter := substr(v_string,1,1);
 		v_letter2 := substr(v_string,1,2);
 		
-		if 	(p_expression_type = 'select' and (v_letter in ('+','*','/') OR (v_letter = '-' AND substr(v_string,2,1) not in ('0','1','2','3','4','5','6','7','8','9'))))
+		if p_expression_type = 'where' and v_letter2 in ('<=','>=','!=','<>') then
+			p_operator := v_letter2;
+			p_rest := trimme(substr(v_string,3,length(v_string)-1));
+		elsif 	(p_expression_type = 'select' and (v_letter in ('+','*','/') OR (v_letter = '-' AND substr(v_string,2,1) not in ('0','1','2','3','4','5','6','7','8','9'))))
 			or
 			(p_expression_type = 'where' and (v_letter in ('<','>','=','+','*','/') OR (v_letter = '-' AND substr(v_string,2,1) not in ('0','1','2','3','4','5','6','7','8','9'))))
 		then
 			p_operator := v_letter;
 			p_rest := trimme(substr(v_string,2,length(v_string)-1));
-		elsif p_expression_type = 'where' and v_letter2 in ('<=','>=','!=','<>') then
-			p_operator := v_letter2;
-			p_rest := trimme(substr(v_string,3,length(v_string)-1));
 		elsif p_expression_type = 'where' and lower(v_next_word1) in ('is','or') then
 			p_operator := lower(v_next_word1);
 			p_rest := trimme(substr(v_string,3,length(v_string)-1));
