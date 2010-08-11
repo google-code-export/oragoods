@@ -1,4 +1,4 @@
-create or replace PACKAGE BODY GDataSource
+CREATE OR REPLACE PACKAGE BODY GDataSource
 	/**
 	 * OraGoods - Copyright 2009 www.4tm.com.ar - Jose Luis Canciani
 	 * Oracle PL/SQL Implementation for Google Data Source objects 
@@ -2023,4 +2023,5 @@ AS
 		return to_date('1970-01-01 00:00:00','yyyy-mm-dd hh24:mi:ss')+(p_date/1000/60/60/24);
 	end toDate;
 	
-end GDataSource;
+END GDataSource;
+/
