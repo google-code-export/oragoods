@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE BODY GDataSource
+create or replace PACKAGE BODY GDataSource
 	/**
 	 * OraGoods - Copyright 2009 www.4tm.com.ar - Jose Luis Canciani
 	 * Oracle PL/SQL Implementation for Google Data Source objects 
@@ -1321,6 +1321,7 @@ AS
 		v_datasource_labels_values	t_varchar2; -- store labels
 		v_datasource_formats_cols	t_varchar2; -- store formats
 		v_datasource_formats_values	t_varchar2; -- store formats
+    v_comma       boolean;
 		
 		v_buffer			varchar2(32767); -- temporary store translated select clause
 		v_where_buffer		varchar2(32767); -- temporary store the where clause
@@ -1476,11 +1477,21 @@ AS
 			raise_application_error(-20050,'Parse error: no reference to a Datasource column found on the query');
 		end if;
 		v_parsed_query := v_parsed_query || ' from ('||chr(10)||'select ';
+    v_comma := false;
 		for i in 1..g_datasource_needed_columns.count loop
 			if g_datasource_needed_columns(i) = 'YES' then
-				if i > 1 then
-					v_parsed_query := v_parsed_query || ', ';
-				end if;
+        -- add comma only if this is not the first needed column
+        if not v_comma then
+          for j in 1..(i-1) loop
+            if g_datasource_needed_columns(j) = 'YES' then
+              v_comma := true;
+              exit;
+            end if;
+          end loop;
+        end if;
+        if v_comma then
+          v_parsed_query := v_parsed_query || ', ';
+        end if;
 				v_parsed_query := v_parsed_query || g_datasource_columns_full(i);
 			end if;
 		end loop;
@@ -2013,4 +2024,3 @@ AS
 	end toDate;
 	
 end GDataSource;
-/
