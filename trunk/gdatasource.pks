@@ -92,5 +92,5 @@ AS
 	function toDate(p_date	IN	timestamp) return date;
 	function toDate(p_date	IN	number) return date;
 	
-end GDataSource;
+END GDataSource;
 / 
