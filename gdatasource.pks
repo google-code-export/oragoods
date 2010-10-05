@@ -37,9 +37,10 @@ AS
 	
 	-- global variables
 	g_debug						              boolean := false;
-  g_clob_output                   CLOB := ''; -- only used WHEN g_opt_clob_output = false AND g_debug = false
+  g_clob_output                   CLOB; -- only used WHEN g_opt_clob_output = false AND g_debug = false
 	
   -- package variables
+  g_clob_initialized              boolean := false;
 	g_google_query 				          varchar2(32767);	-- the query as send by the user (set by setQuery proc)
 	-- the datasource query (needs to be already defined, it's set by setDataSource proc)
 	g_datasource_select_clause	    varchar2(32767);	-- the select part

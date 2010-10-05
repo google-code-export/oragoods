@@ -51,7 +51,8 @@ AS
 			dbms_output.put_line(print);
 		else
       if g_opt_clob_output then
-        g_clob_output := g_clob_output || print || chr(10);
+        --g_clob_output := g_clob_output || print || chr(10);
+        DBMS_LOB.WRITEAPPEND(g_clob_output,length(print)+1,print||chr(10));
 			else
         htp.p(print);
       end if;
@@ -66,7 +67,8 @@ AS
 			dbms_output.put(print);
 		else
       if g_opt_clob_output then
-        g_clob_output := g_clob_output || print;
+        --g_clob_output := g_clob_output || print;
+        DBMS_LOB.WRITEAPPEND(g_clob_output,length(print),print);
       else
         htp.prn(print);
       end if;
@@ -80,7 +82,8 @@ AS
 			dbms_output.new_line;	
 		else
       if g_opt_clob_output then
-        g_clob_output := g_clob_output || chr(10);
+        --g_clob_output := g_clob_output || chr(10);
+        DBMS_LOB.WRITEAPPEND(g_clob_output,1,chr(10));
       else
         htp.prn(chr(10));	
       end if;
@@ -93,8 +96,17 @@ AS
 	procedure clean
 	is
 	begin
-    g_clob_output := '';
-		g_google_query := null;
+    
+    if g_opt_clob_output then
+      if g_clob_initialized then
+        DBMS_LOB.FREETEMPORARY(g_clob_output);
+      end if;
+      g_clob_output := EMPTY_CLOB();
+      DBMS_LOB.CreateTemporary(g_clob_output,TRUE);
+      g_clob_initialized := true;
+    end if;
+    
+    g_google_query := null;
 		g_datasource_select_clause := null;
 		g_datasource_rest_of_clause	:= null;
 		g_datasource_columns.delete;
@@ -1682,6 +1694,8 @@ AS
 		
 	BEGIN
 		
+    clean;
+    
 		begin
 			select sql_text 
 			into v_query
@@ -1693,8 +1707,6 @@ AS
 				p('error, no datasource found');
 				return;
 		end;
-		
-		clean;
 		
 		-- set DataSource
 		setDataSource(v_query);
@@ -1939,7 +1951,7 @@ AS
      
     dbms_sql.close_cursor(v_cursor);
 	    
-	EXCEPTION
+	/*EXCEPTION
 		WHEN OTHERS THEN
 			declare
 				v_errors t_varchar2;
@@ -1954,7 +1966,7 @@ AS
 					v_detailed_messages,
 					tqx
 				);
-			end;
+			end;*/
 	END get_json;
   
   /**
