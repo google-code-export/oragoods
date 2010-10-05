@@ -80,6 +80,11 @@ AS
 		tq 							        IN			varchar2 default 'select *',
 		tqx							        IN			varchar2 default NULL
 	);
+  function get_json(
+    p_datasource_id 			  IN 			gdatasources.id%type,
+		tq 							        IN			varchar2 default 'select *',
+		tqx							        IN			varchar2 default NULL
+  ) return sys.KU$_VCNT pipelined;
 	
 	-- print json errors
 	procedure print_json_error(
