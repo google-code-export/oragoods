@@ -169,20 +169,20 @@ COLUMN_VALUE
 ============
 google.visualization.Query.setResponse(
 {
- version: ""0.7"",
- status: ""ok"",
+ version: "0.7",
+ status: "ok",
  reqId: 0,
  table: {
   cols: [
-   {id: ""COL1"", label: ""COL1"", type: ""string""},
-   {id: ""COL2"", label: ""COL2"", type: ""string""},
-   {id: ""COL3"", label: ""COL3"", type: ""string""}
+   {id: "COL1", label: "COL1", type: "string"},
+   {id: "COL2", label: "COL2", type: "string"},
+   {id: "COL3", label: "COL3", type: "string"}
   ],
   rows: [
    {c: [ 
-    {v: ""this""},
-    {v: ""is""},
-    {v: ""test""}
+    {v: "this"},
+    {v: "is"},
+    {v: "test"}
    ]}
   ]
  }
@@ -195,4 +195,4 @@ This code is new and has not much testing so far, so you can load bugs in the Is
 
 Regards,
 Jose Canciani
-www.4tm.com.ar
+www.4tm.biz
