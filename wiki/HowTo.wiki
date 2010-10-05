@@ -142,6 +142,23 @@ As you can see, this returns a Google DataSource that you can use with the Visua
 
 From the browser you can use it as: http://your-db-server:8080/scott/gdatasource.get_json?p_datasource_id=test
 
+As of version 0.6 you can get the output as a CLOB variable using PL/SQL. Here's an example, we print the resulting CLOB to screen with dbms_output, you probably will want to do something else:
+
+<code>
+declare
+  l_offset number default 1;
+begin
+  gdatasource.g_debug := false;
+  gdatasource.g_opt_clob_output := true;
+  gdatasource.get_json('test','select *');
+  loop
+     exit when l_offset > dbms_lob.getlength(gdatasource.g_clob_output);
+     dbms_output.put_line( dbms_lob.substr( gdatasource.g_clob_output, 255, l_offset ) );
+     l_offset := l_offset + 255;
+  end loop;
+end;
+</code>
+
 This code is new and has not much testing so far, so you can load bugs in the Issues tab.
 
 Regards,
