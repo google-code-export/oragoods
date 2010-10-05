@@ -8,19 +8,19 @@ CREATE OR REPLACE PACKAGE BODY GDataSource
 	 * 
 	 * Copyright Notice
 	 *
-  	 * This file is part of ORAGOODS, a library developed by Jose Luis Canciani
-  	 * 
-  	 * ORAGOODS is free software: you can redistribute it and/or modify
-  	 * it under the terms of the GNU General Public License as published by
-  	 * the Free Software Foundation, either version 3 of the License, or
-  	 * (at your option) any later version.
-  	 * 
-  	 * ORAGOODS is distributed in the hope that it will be useful,
-  	 * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  	 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  	 * GNU General Public License for more details.
-  	 * 
-  	 * You should have received a copy of the GNU General Public License
+   * This file is part of ORAGOODS, a library developed by Jose Luis Canciani
+   * 
+   * ORAGOODS is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   * 
+   * ORAGOODS is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   * GNU General Public License for more details.
+   * 
+   * You should have received a copy of the GNU General Public License
  	 * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 	 * 
  	 */
@@ -50,7 +50,11 @@ AS
 		if g_debug then
 			dbms_output.put_line(print);
 		else
-			htp.p(print);
+      if g_opt_clob_output then
+        g_clob_output := g_clob_output || print || chr(10);
+			else
+        htp.p(print);
+      end if;
 		end if;
 	end p;
 	
@@ -61,7 +65,11 @@ AS
 		if g_debug then
 			dbms_output.put(print);
 		else
-			htp.prn(print);
+      if g_opt_clob_output then
+        g_clob_output := g_clob_output || print;
+      else
+        htp.prn(print);
+      end if;
 		end if;
 	end prn;
 	
@@ -71,7 +79,11 @@ AS
 		if g_debug then
 			dbms_output.new_line;	
 		else
-			htp.prn(chr(10));	
+      if g_opt_clob_output then
+        g_clob_output := g_clob_output || chr(10);
+      else
+        htp.prn(chr(10));	
+      end if;
 		end if;
 	end nl;
 	
@@ -81,6 +93,7 @@ AS
 	procedure clean
 	is
 	begin
+    g_clob_output := '';
 		g_google_query := null;
 		g_datasource_select_clause := null;
 		g_datasource_rest_of_clause	:= null;
@@ -1640,32 +1653,32 @@ AS
 	
 	procedure get_json(
 		p_datasource_id 			IN 			gdatasources.id%type,
-		tq 							IN			varchar2 default 'select *',
-		tqx							IN			varchar2 default NULL
+		tq 							      IN			varchar2 default 'select *',
+		tqx							      IN			varchar2 default NULL
 	) is
         
-        -- datasource query
-        v_query				gdatasources.sql_text%type;
+    -- datasource query
+    v_query				        gdatasources.sql_text%type;
         
 		-- dynamic cursor info
-        v_cursor NUMBER;						-- cursor id
-        v_cursor_output NUMBER;					-- execute cursor output
-        v_col_cnt PLS_INTEGER;					-- # of columns
-        record_desc_table dbms_sql.desc_tab; 	-- description table
-        
-        -- to store output values of the query
-        v_col_char 			VARCHAR2(32767);
-        v_col_number 		NUMBER;
-		v_col_date 			DATE;
-		v_col_datetime 		TIMESTAMP;
-		v_col_clob			CLOB;
+    v_cursor              NUMBER;						-- cursor id
+    v_cursor_output       NUMBER;					-- execute cursor output
+    v_col_cnt             PLS_INTEGER;					-- # of columns
+    record_desc_table     dbms_sql.desc_tab; 	-- description table
+    
+    -- to store output values of the query
+    v_col_char 			      VARCHAR2(32767);
+    v_col_number 		      NUMBER;
+		v_col_date 			      DATE;
+		v_col_datetime 		    TIMESTAMP;
+		v_col_clob			      CLOB;
         
 		-- logic helper vars
-		v_first boolean;
+		v_first               boolean;
 		
 		-- buffer to avoid printing before testing column formats
-		v_buffer			varchar2(32767) := '';
-		v_test_format		varchar2(1000);
+		v_buffer			        varchar2(32767) := '';
+		v_test_format		      varchar2(1000);
 		
 	BEGIN
 		
@@ -1690,16 +1703,16 @@ AS
 		setQuery(tq);
 		
 		-- open cursor
-        v_cursor := dbms_sql.open_cursor;
-        
-        -- prepare cursor (parse and bind)
+    v_cursor := dbms_sql.open_cursor;
+    
+    -- prepare cursor (parse and bind)
 		prepareCursor(v_cursor);
 		
 		-- execute the cursor
-        v_cursor_output := dbms_sql.execute(v_cursor); 
+    v_cursor_output := dbms_sql.execute(v_cursor); 
 		
 		-- get columns of the cursor
-        dbms_sql.describe_columns(v_cursor, v_col_cnt, record_desc_table);
+    dbms_sql.describe_columns(v_cursor, v_col_cnt, record_desc_table);
 		
 		-- NOTE
 		-- from now on, we should not have any errors!
@@ -1710,214 +1723,216 @@ AS
 	    loop if record_desc_table(col).col_name != 'RNUM' then 
 	        
 		    -- create column details
-            v_buffer := v_buffer || '   {'	||
-            			'id: "'||record_desc_table(col).col_name||'", ';
+        v_buffer := v_buffer || '   {'	||
+              'id: "'||record_desc_table(col).col_name||'", ';
+        
+        if not g_opt_no_values then
+          if g_datasource_labels(col) is not null then
+            v_buffer := v_buffer || 'label: "'||g_datasource_labels(col)||'", ';
+          else
+            v_buffer := v_buffer || 'label: "'||record_desc_table(col).col_name||'", ';
+          end if;
+        end if;
             
-            if not g_opt_no_values then
-            	if g_datasource_labels(col) is not null then
-            		v_buffer := v_buffer || 'label: "'||g_datasource_labels(col)||'", ';
-            	else
-            		v_buffer := v_buffer || 'label: "'||record_desc_table(col).col_name||'", ';
-            	end if;
-            end if;
+        if record_desc_table(col).col_type in (1,9,96,112) then
+            -- varchar, varchar2, char and CLOB
+            DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_char, 32767);
+            v_buffer := v_buffer || 'type: "string"';
+        elsif record_desc_table(col).col_type = 2 then
+            -- number
+            DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_number);
+            v_buffer := v_buffer || 'type: "number"';
+        elsif record_desc_table(col).col_type = 12 then
+            -- date
+            DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_date);
+            v_buffer := v_buffer || 'type: "date"';
+        elsif record_desc_table(col).col_type = 187 then
+            -- timestamp
+            DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_datetime);
+            v_buffer := v_buffer || 'type: "datetime"';
+        else 
+            raise_application_error(-20001,'Not expected datatype');
+        END IF;
             
-            if record_desc_table(col).col_type in (1,9,96,112) then
-                -- varchar, varchar2, char and CLOB
-                DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_char, 32767);
-                v_buffer := v_buffer || 'type: "string"';
-            elsif record_desc_table(col).col_type = 2 then
-                -- number
-                DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_number);
-                v_buffer := v_buffer || 'type: "number"';
-			elsif record_desc_table(col).col_type = 12 then
-                -- date
-                DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_date);
-                v_buffer := v_buffer || 'type: "date"';
-            elsif record_desc_table(col).col_type = 187 then
-                -- timestamp
-                DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_datetime);
-                v_buffer := v_buffer || 'type: "datetime"';
-            else 
-                raise_application_error(-20001,'Not expected datatype');
-            END IF;
+        -- test format! Only valid for number, date and timestamp, ignore the rest
+        if record_desc_table(col).col_type in (2,12,187) and g_datasource_formats(col) is not null and not g_opt_no_format then
+            declare
+              v_type varchar2(20);
+            begin
+              if record_desc_table(col).col_type = 2 then
+                v_type := 'Number';
+                v_test_format := to_char(1,g_datasource_formats(col));
+              elsif record_desc_table(col).col_type = 12 then
+                v_type := 'Date';
+                v_test_format := to_char(sysdate,g_datasource_formats(col));
+              elsif record_desc_table(col).col_type = 187 then
+                v_type := 'Datetime';
+                v_test_format := to_char(systimestamp,g_datasource_formats(col));
+              end if;
+            exception
+              when others then
+                raise_application_error(-20060,'Invalid format given for '||v_type||' column: '||g_datasource_formats.count||' '||g_datasource_formats(col));
+            end;
+        end if;
             
-            -- test format! Only valid for number, date and timestamp, ignore the rest
-			if record_desc_table(col).col_type in (2,12,187) and g_datasource_formats(col) is not null and not g_opt_no_format then
-				declare
-					v_type varchar2(20);
-				begin
-					if record_desc_table(col).col_type = 2 then
-						v_type := 'Number';
-               			v_test_format := to_char(1,g_datasource_formats(col));
-               		elsif record_desc_table(col).col_type = 12 then
-               			v_type := 'Date';
-               			v_test_format := to_char(sysdate,g_datasource_formats(col));
-               		elsif record_desc_table(col).col_type = 187 then
-               			v_type := 'Datetime';
-               			v_test_format := to_char(systimestamp,g_datasource_formats(col));
-               		end if;
-               	exception
-               		when others then
-               			raise_application_error(-20060,'Invalid format given for '||v_type||' column: '||g_datasource_formats.count||' '||g_datasource_formats(col));
-               	end;
-            end if;
+        if col < v_col_cnt then
+          v_buffer := v_buffer || '},';
+        else
+          v_buffer := v_buffer || '}';
+        end if;
             
-            if col < v_col_cnt then
-            	v_buffer := v_buffer || '},';
-            else
-            	v_buffer := v_buffer || '}';
-            end if;
-            
-            v_buffer := v_buffer || chr(10);
+        v_buffer := v_buffer || chr(10);
 	        
 	    end if; end loop;
 	    
 	    -- return the json object with the proper response Handler given
-		if not g_debug then
-	    	owa_util.mime_header('text/x-json', FALSE, NULL);
-			htp.p('Pragma: no-cache');
-			htp.p('Expires: Thu, 01 Jan 1970 12:00:00 GMT');
-			owa_util.http_header_close;
-		end if;
+      if not g_debug and not g_opt_clob_output then
+          owa_util.mime_header('text/x-json', FALSE, NULL);
+          htp.p('Pragma: no-cache');
+          htp.p('Expires: Thu, 01 Jan 1970 12:00:00 GMT');
+          owa_util.http_header_close;
+      end if;
 		
-		-- start the JSON object
-        p(nvl(get_tqx_attr('responseHandler',tqx),'google.visualization.Query.setResponse')||'(');
-		p('{');
-		p(' version: "'||g_version||'",');
-		p(' status: "ok",');
-		p(' reqId: '||nvl(get_tqx_attr('reqId',tqx),0)||',');
+      -- start the JSON object
+      p(nvl(get_tqx_attr('responseHandler',tqx),'google.visualization.Query.setResponse')||'(');
+      p('{');
+      p(' version: "'||g_version||'",');
+      p(' status: "ok",');
+      p(' reqId: '||nvl(get_tqx_attr('reqId',tqx),0)||',');
 		
-		-- TODO: signature ??
-		-- p(' signature: "928347923874923874",');
+      -- TODO: signature ??
+      -- p(' signature: "928347923874923874",');
 		
-		-- start building the table
-		p(' table: {');
+      -- start building the table
+      p(' table: {');
+      
+      -- define cols
+      p('  cols: [');
+        
+        p(v_buffer);
+        
+      p('  ],');
+      
+      -- rows!
+      p('  rows: [');
 		
-		-- define cols
-		p('  cols: [');
+      v_first := true;
+		
+      loop
 			
-			p(v_buffer);
-			
-		p('  ],');
-		
-		-- rows!
-		p('  rows: [');
-		
-		v_first := true;
-		
-		loop
-			
-			-- Fetch a row from the source table
-	        exit when dbms_sql.fetch_rows(v_cursor) = 0;
-	        
-	        -- create row details
-			
-			-- Add the col and rows objects to the table json
-			if v_first then
-				p('   {c: [ ');
-				v_first := false;
-			else
-				p('   ,{c: [ ');
-			end if;
-	        
-	        for col in 1..v_col_cnt
-	        loop if record_desc_table(col).col_name != 'RNUM' then 
+        -- Fetch a row from the source table
+            exit when dbms_sql.fetch_rows(v_cursor) = 0;
             
-				prn('    {');
-                
-            	if record_desc_table(col).col_type in (1,9,96) then
-            		-- varchar, varchar2, char
-                    dbms_sql.column_value(v_cursor, col, v_col_char);
-                    if v_col_char is null then
-                    	prn('v: null');
-                    else
-                    	prn('v: "');
-                    	printJsonString(v_col_char);
-                    	prn ('"');
-                    end if;
-            	elsif record_desc_table(col).col_type = 2 then
-            		-- number
-                    dbms_sql.column_value(v_cursor, col, v_col_number);
-                    -- TODO: opt no_values
-					if v_col_number is null then
-						prn('v: null');
-					else
-	                    prn('v: '||to_char(v_col_number));
-	                    if g_datasource_formats(col) is not null and not g_opt_no_format then
-	                    	prn(', f: "'||to_char(v_col_number,g_datasource_formats(col))||'"');
-	                    end if;
-					end if;
-				elsif record_desc_table(col).col_type = 12 then
-                    dbms_sql.column_value(v_cursor, col, v_col_date);
-                    if v_col_date is null then
-                    	prn('v: null');
-                    else
-	                    prn('v: new Date('||                    
-	    					nvl(trim(leading '0' from to_char(v_col_date,'yyyy')),'0')	||','||
-	    					nvl(trim(leading '0' from to_char(v_col_date,'mm')),'0')		||','||
-	    					nvl(trim(leading '0' from to_char(v_col_date,'dd')),'0')		||','||
-	    					nvl(trim(leading '0' from to_char(v_col_date,'hh24')),'0')	||','||
-	    					nvl(trim(leading '0' from to_char(v_col_date,'mi')),'0')		||','||
-	    					nvl(trim(leading '0' from to_char(v_col_date,'ss')),'0')		||')');
-	                    if g_datasource_formats(col) is not null and not g_opt_no_format then
-	                    	prn(', f: "'||to_char(v_col_date,g_datasource_formats(col))||'"');
-	                    elsif not g_opt_no_format then
-	                    	prn(', f: "'||to_char(v_col_date,'yyyy-mm-dd hh24:mi:ss')||'"');	
-	                    end if;
-	                end if;
-            	elsif record_desc_table(col).col_type = 187 then
-                    dbms_sql.column_value(v_cursor, col, v_col_datetime);
-                    if v_col_datetime is null then
-                    	prn('v: null');
-                    else
-	                    prn('v: new Date('||                    
-	    					nvl(trim(leading '0' from to_char(v_col_datetime,'yyyy')),'0')	||','||
-	    					nvl(trim(leading '0' from to_char(v_col_datetime,'mm')),'0')		||','||
-	    					nvl(trim(leading '0' from to_char(v_col_datetime,'dd')),'0')		||','||
-	    					nvl(trim(leading '0' from to_char(v_col_datetime,'hh24')),'0')		||','||
-	    					nvl(trim(leading '0' from to_char(v_col_datetime,'mi')),'0')		||','||
-	    					nvl(trim(leading '0' from to_char(v_col_datetime,'ss')),'0')		||'.'||
-	    					nvl(trim(leading '0' from to_char(v_col_datetime,'ff3')),'0')		||')');
-	                    if g_datasource_formats(col) is not null and not g_opt_no_format then
-	                    	prn(', f: "'||to_char(v_col_datetime,g_datasource_formats(col))||'"');
-	                    elsif not g_opt_no_format then
-	                    	prn(', f: "'||to_char(v_col_datetime,'yyyy-mm-dd hh24:mi:ss')||'"');	
-	                    end if;
-					end if;
-				elsif record_desc_table(col).col_type = 112 then
-            		-- CLOB
-                    dbms_sql.column_value(v_cursor, col, v_col_clob);
-                    if nvl(dbms_lob.GETLENGTH(v_col_clob),0) = 0 or v_col_clob is null then
-                    	prn('v: null');
-                    else
-                    	prn('v: "');
-                    	printJsonString(v_col_clob);
-                    	prn ('"');
-                    end if;
-            	end if;
-            	
-            	if col < v_col_cnt then
-	            	prn('},');
-	            else
-	            	prn('}');
-	            end if;
-	            
-				nl;
-				                
-	        end if; end loop;
+            -- create row details
+        
+        -- Add the col and rows objects to the table json
+        if v_first then
+          p('   {c: [ ');
+          v_first := false;
+        else
+          p('   ,{c: [ ');
+        end if;
 	        
-	        p('   ]}');
+        for col in 1..v_col_cnt
+        loop if record_desc_table(col).col_name != 'RNUM' then 
+            
+            prn('    {');
+              
+            if record_desc_table(col).col_type in (1,9,96) then
+              -- varchar, varchar2, char
+              dbms_sql.column_value(v_cursor, col, v_col_char);
+              if v_col_char is null then
+                prn('v: null');
+              else
+                prn('v: "');
+                printJsonString(v_col_char);
+                prn ('"');
+              end if;
+            elsif record_desc_table(col).col_type = 2 then
+              -- number
+              dbms_sql.column_value(v_cursor, col, v_col_number);
+              -- TODO: opt no_values
+              if v_col_number is null then
+                prn('v: null');
+              else
+                prn('v: '||to_char(v_col_number));
+                if g_datasource_formats(col) is not null and not g_opt_no_format then
+                  prn(', f: "'||to_char(v_col_number,g_datasource_formats(col))||'"');
+                end if;
+              end if;
+            elsif record_desc_table(col).col_type = 12 then
+                dbms_sql.column_value(v_cursor, col, v_col_date);
+                if v_col_date is null then
+                  prn('v: null');
+                else
+                  prn('v: new Date('||                    
+                      nvl(trim(leading '0' from to_char(v_col_date,'yyyy')),'0')	||','||
+                      nvl(trim(leading '0' from to_char(v_col_date,'mm')),'0')		||','||
+                      nvl(trim(leading '0' from to_char(v_col_date,'dd')),'0')		||','||
+                      nvl(trim(leading '0' from to_char(v_col_date,'hh24')),'0')	||','||
+                      nvl(trim(leading '0' from to_char(v_col_date,'mi')),'0')		||','||
+                      nvl(trim(leading '0' from to_char(v_col_date,'ss')),'0')		||')'
+                  );
+                  if g_datasource_formats(col) is not null and not g_opt_no_format then
+                    prn(', f: "'||to_char(v_col_date,g_datasource_formats(col))||'"');
+                  elsif not g_opt_no_format then
+                    prn(', f: "'||to_char(v_col_date,'yyyy-mm-dd hh24:mi:ss')||'"');	
+                  end if;
+                end if;
+            elsif record_desc_table(col).col_type = 187 then
+                dbms_sql.column_value(v_cursor, col, v_col_datetime);
+                if v_col_datetime is null then
+                  prn('v: null');
+                else
+                  prn('v: new Date('||                    
+                      nvl(trim(leading '0' from to_char(v_col_datetime,'yyyy')),'0')	||','||
+                      nvl(trim(leading '0' from to_char(v_col_datetime,'mm')),'0')		||','||
+                      nvl(trim(leading '0' from to_char(v_col_datetime,'dd')),'0')		||','||
+                      nvl(trim(leading '0' from to_char(v_col_datetime,'hh24')),'0')		||','||
+                      nvl(trim(leading '0' from to_char(v_col_datetime,'mi')),'0')		||','||
+                      nvl(trim(leading '0' from to_char(v_col_datetime,'ss')),'0')		||'.'||
+                      nvl(trim(leading '0' from to_char(v_col_datetime,'ff3')),'0')		||')'
+                  );
+                  if g_datasource_formats(col) is not null and not g_opt_no_format then
+                    prn(', f: "'||to_char(v_col_datetime,g_datasource_formats(col))||'"');
+                  elsif not g_opt_no_format then
+                    prn(', f: "'||to_char(v_col_datetime,'yyyy-mm-dd hh24:mi:ss')||'"');	
+                  end if;
+                end if;
+            elsif record_desc_table(col).col_type = 112 then
+            		-- CLOB
+                dbms_sql.column_value(v_cursor, col, v_col_clob);
+                if nvl(dbms_lob.GETLENGTH(v_col_clob),0) = 0 or v_col_clob is null then
+                  prn('v: null');
+                else
+                  prn('v: "');
+                  printJsonString(v_col_clob);
+                  prn ('"');
+                end if;
+            end if;
+            	
+            if col < v_col_cnt then
+              prn('},');
+            else
+              prn('}');
+            end if;
+	            
+            nl;
+				                
+	      end if; end loop;
+	        
+        p('   ]}');
 	    
 		end loop;
 	    
-	    p('  ]');
-	    p(' }');
-	    p('}');
-	    
-	    -- finish!
-	    p(')');
-	     
-	    dbms_sql.close_cursor(v_cursor);
+    p('  ]');
+    p(' }');
+    p('}');
+    
+    -- finish!
+    p(')');
+     
+    dbms_sql.close_cursor(v_cursor);
 	    
 	EXCEPTION
 		WHEN OTHERS THEN
@@ -1935,13 +1950,12 @@ AS
 					tqx
 				);
 			end;
-	
-    END get_json;
+	END get_json;
     
-	/**
-	 * Send errors
-	 *
-	 */
+  /**
+   * Send errors
+   *
+   */
 	procedure print_json_error(
 		p_reasons 			IN t_varchar2,
 		p_messages 			IN t_varchar2,
