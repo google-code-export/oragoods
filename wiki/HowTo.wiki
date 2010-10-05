@@ -159,6 +159,38 @@ begin
 end;
 </code>
 
+And also as a pipelined function!
+
+<code>
+
+SQL> select * from table(gdatasource.get_json('test','select *'));
+
+COLUMN_VALUE
+============
+google.visualization.Query.setResponse(
+{
+ version: ""0.7"",
+ status: ""ok"",
+ reqId: 0,
+ table: {
+  cols: [
+   {id: ""COL1"", label: ""COL1"", type: ""string""},
+   {id: ""COL2"", label: ""COL2"", type: ""string""},
+   {id: ""COL3"", label: ""COL3"", type: ""string""}
+  ],
+  rows: [
+   {c: [ 
+    {v: ""this""},
+    {v: ""is""},
+    {v: ""test""}
+   ]}
+  ]
+ }
+}
+)
+
+</code>
+
 This code is new and has not much testing so far, so you can load bugs in the Issues tab.
 
 Regards,
