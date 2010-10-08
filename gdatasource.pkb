@@ -1666,16 +1666,17 @@ AS
 	procedure get_json(
 		p_datasource_id 			IN 			gdatasources.id%type,
 		tq 							      IN			varchar2 default 'select *',
-		tqx							      IN			varchar2 default NULL
+		tqx							      IN			varchar2 default NULL,
+    noCallback            IN      varchar2 default 'N'
 	) is
         
     -- datasource query
     v_query				        gdatasources.sql_text%type;
         
 		-- dynamic cursor info
-    v_cursor              NUMBER;						-- cursor id
-    v_cursor_output       NUMBER;					-- execute cursor output
-    v_col_cnt             PLS_INTEGER;					-- # of columns
+    v_cursor              NUMBER;						  -- cursor id
+    v_cursor_output       NUMBER;					    -- execute cursor output
+    v_col_cnt             PLS_INTEGER;			  -- # of columns
     record_desc_table     dbms_sql.desc_tab; 	-- description table
     
     -- to store output values of the query
@@ -1811,7 +1812,9 @@ AS
     end if;
   
     -- start the JSON object
-    p(nvl(get_tqx_attr('responseHandler',tqx),'google.visualization.Query.setResponse')||'(');
+    if noCallback = 'N' then
+      p(nvl(get_tqx_attr('responseHandler',tqx),'google.visualization.Query.setResponse')||'(');
+    end if;
     p('{');
     p(' version: "'||g_version||'",');
     p(' status: "ok",');
@@ -1947,11 +1950,13 @@ AS
     p('}');
     
     -- finish!
-    p(')');
+    if noCallback = 'N' then
+      p(')');
+    end if;
      
     dbms_sql.close_cursor(v_cursor);
 	    
-	/*EXCEPTION
+	EXCEPTION
 		WHEN OTHERS THEN
 			declare
 				v_errors t_varchar2;
@@ -1964,9 +1969,10 @@ AS
 					v_errors,
 					v_messages,
 					v_detailed_messages,
-					tqx
+					tqx,
+          noCallback
 				);
-			end;*/
+			end;
 	END get_json;
   
   /**
@@ -1976,7 +1982,8 @@ AS
   function get_json(
     p_datasource_id 			  IN 			gdatasources.id%type,
 		tq 							        IN			varchar2 default 'select *',
-		tqx							        IN			varchar2 default NULL
+		tqx							        IN			varchar2 default NULL,
+    noCallback              IN      varchar2 default 'N'
   ) return sys.KU$_VCNT pipelined
   is
     l_offset pls_integer default 1;
@@ -1989,7 +1996,8 @@ AS
     get_json(
       p_datasource_id,
       tq,
-      tqx
+      tqx,
+      noCallback
     );
     v_length := dbms_lob.getlength(gdatasource.g_clob_output);
     loop
@@ -2023,17 +2031,18 @@ AS
        exit;
       end if;
     end loop;
-  end;
+  end get_json;
     
   /**
    * Send errors
    *
    */
 	procedure print_json_error(
-		p_reasons 			IN t_varchar2,
-		p_messages 			IN t_varchar2,
-		p_detailed_messages IN t_varchar2,
-		tqx VARCHAR2 DEFAULT NULL
+		p_reasons 			        IN t_varchar2,
+		p_messages 			        IN t_varchar2,
+		p_detailed_messages     IN t_varchar2,
+		tqx                     IN VARCHAR2 DEFAULT NULL,
+    noCallback              varchar2 default 'N'
 	) is
 	begin
 		
@@ -2045,8 +2054,9 @@ AS
 			owa_util.http_header_close;
 		end if;
 		
-		
-		p(nvl(get_tqx_attr('responseHandler',tqx),'google.visualization.Query.setResponse')||'(');
+		if noCallback = 'N' then
+      p(nvl(get_tqx_attr('responseHandler',tqx),'google.visualization.Query.setResponse')||'(');
+    end if;
 				
 		p('{');
 		p(' version: "'||g_version||'",');
@@ -2090,8 +2100,10 @@ AS
 		p(' ]');
 	    p('}');
 	    
-	    -- finish!
-	    p(')');		
+    -- finish!
+    if noCallback = 'N' then
+      p(')');		
+    end if;
 		
 	end print_json_error;
 	
