@@ -79,20 +79,23 @@ AS
 	procedure get_json(
 		p_datasource_id 			  IN 			gdatasources.id%type,
 		tq 							        IN			varchar2 default 'select *',
-		tqx							        IN			varchar2 default NULL
+		tqx							        IN			varchar2 default NULL,
+    noCallback              IN      varchar2 default 'N'
 	);
   function get_json(
     p_datasource_id 			  IN 			gdatasources.id%type,
 		tq 							        IN			varchar2 default 'select *',
-		tqx							        IN			varchar2 default NULL
+		tqx							        IN			varchar2 default NULL,
+    noCallback              IN      varchar2 default 'N'
   ) return sys.KU$_VCNT pipelined;
 	
 	-- print json errors
 	procedure print_json_error(
-		p_reasons 			        IN t_varchar2,
-		p_messages 			        IN t_varchar2,
-		p_detailed_messages     IN t_varchar2,
-		tqx                     VARCHAR2 DEFAULT NULL
+		p_reasons 			        IN      t_varchar2,
+		p_messages 			        IN      t_varchar2,
+		p_detailed_messages     IN      t_varchar2,
+		tqx                     IN      VARCHAR2 DEFAULT NULL,
+    noCallback              IN      VARCHAR2 default 'N'
 	);
 	
 	/**
