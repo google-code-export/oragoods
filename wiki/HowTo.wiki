@@ -150,7 +150,7 @@ declare
 begin
   gdatasource.g_debug := false;
   gdatasource.g_opt_clob_output := true;
-  gdatasource.get_json('test','select *');
+  gdatasource.get_json('test','select `*`');
   loop
      exit when l_offset > dbms_lob.getlength(gdatasource.g_clob_output);
      dbms_output.put_line( dbms_lob.substr( gdatasource.g_clob_output, 255, l_offset ) );
@@ -163,7 +163,7 @@ And also as a pipelined function!
 
 <code>
 
-SQL> select * from table(gdatasource.get_json('test','select *'));
+SQL> select `*` from table(gdatasource.get_json('test','select `*`'));
 
 COLUMN_VALUE
 ============
