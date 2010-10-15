@@ -1744,32 +1744,32 @@ AS
       end if;
       
       v_buffer := v_buffer || '   {'	||
-            'id: "'||record_desc_table(col).col_name||'", ';
+            '"id": "'||record_desc_table(col).col_name||'", ';
       
       if not g_opt_no_values then
         if g_datasource_labels(col) is not null then
-          v_buffer := v_buffer || 'label: "'||g_datasource_labels(col)||'", ';
+          v_buffer := v_buffer || '"label": "'||g_datasource_labels(col)||'", ';
         else
-          v_buffer := v_buffer || 'label: "'||record_desc_table(col).col_name||'", ';
+          v_buffer := v_buffer || '"label": "'||record_desc_table(col).col_name||'", ';
         end if;
       end if;
           
       if record_desc_table(col).col_type in (1,9,96,112) then
           -- varchar, varchar2, char and CLOB
           DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_char, 32767);
-          v_buffer := v_buffer || 'type: "string"';
+          v_buffer := v_buffer || '"type": "string"';
       elsif record_desc_table(col).col_type = 2 then
           -- number
           DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_number);
-          v_buffer := v_buffer || 'type: "number"';
+          v_buffer := v_buffer || '"type": "number"';
       elsif record_desc_table(col).col_type = 12 then
           -- date
           DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_date);
-          v_buffer := v_buffer || 'type: "date"';
+          v_buffer := v_buffer || '"type": "date"';
       elsif record_desc_table(col).col_type = 187 then
           -- timestamp
           DBMS_SQL.DEFINE_COLUMN(v_cursor, col, v_col_datetime);
-          v_buffer := v_buffer || 'type: "datetime"';
+          v_buffer := v_buffer || '"type": "datetime"';
       else 
           raise_application_error(-20001,'Not expected datatype');
       END IF;
@@ -1816,25 +1816,25 @@ AS
       p(nvl(get_tqx_attr('responseHandler',tqx),'google.visualization.Query.setResponse')||'(');
     end if;
     p('{');
-    p(' version: "'||g_version||'",');
-    p(' status: "ok",');
-    p(' reqId: '||nvl(get_tqx_attr('reqId',tqx),0)||',');
+    p(' "version": "'||g_version||'",');
+    p(' "status": "ok",');
+    p(' "reqId": '||nvl(get_tqx_attr('reqId',tqx),0)||',');
   
     -- TODO: signature ??
     -- p(' signature: "928347923874923874",');
   
     -- start building the table
-    p(' table: {');
+    p(' "table": {');
     
     -- define cols
-    p('  cols: [');
+    p('  "cols": [');
       
       p(v_buffer);
       
     p('  ],');
     
     -- rows!
-    p('  rows: [');
+    p('  "rows": [');
   
     v_first := true;
   
@@ -1847,10 +1847,10 @@ AS
       
       -- Add the col and rows objects to the table json
       if v_first then
-        p('   {c: [ ');
+        p('   {"c": [ ');
         v_first := false;
       else
-        p('   ,{c: [ ');
+        p('   ,{"c": [ ');
       end if;
         
       for col in 1..v_col_cnt
@@ -1862,9 +1862,9 @@ AS
             -- varchar, varchar2, char
             dbms_sql.column_value(v_cursor, col, v_col_char);
             if v_col_char is null then
-              prn('v: null');
+              prn('"v": null');
             else
-              prn('v: "');
+              prn('"v": "');
               printJsonString(v_col_char);
               prn ('"');
             end if;
@@ -1873,19 +1873,19 @@ AS
             dbms_sql.column_value(v_cursor, col, v_col_number);
             -- TODO: opt no_values
             if v_col_number is null then
-              prn('v: null');
+              prn('"v": null');
             else
-              prn('v: '||to_char(v_col_number));
+              prn('"v": '||to_char(v_col_number));
               if g_datasource_formats(col) is not null and not g_opt_no_format then
-                prn(', f: "'||to_char(v_col_number,g_datasource_formats(col))||'"');
+                prn(', "f": "'||to_char(v_col_number,g_datasource_formats(col))||'"');
               end if;
             end if;
           elsif record_desc_table(col).col_type = 12 then
               dbms_sql.column_value(v_cursor, col, v_col_date);
               if v_col_date is null then
-                prn('v: null');
+                prn('"v": null');
               else
-                prn('v: new Date('||                    
+                prn('"v": new Date('||                    
                     nvl(trim(leading '0' from to_char(v_col_date,'yyyy')),'0')	||','||
                     nvl(trim(leading '0' from to_char(v_col_date,'mm')),'0')		||','||
                     nvl(trim(leading '0' from to_char(v_col_date,'dd')),'0')		||','||
@@ -1894,17 +1894,17 @@ AS
                     nvl(trim(leading '0' from to_char(v_col_date,'ss')),'0')		||')'
                 );
                 if g_datasource_formats(col) is not null and not g_opt_no_format then
-                  prn(', f: "'||to_char(v_col_date,g_datasource_formats(col))||'"');
+                  prn(', "f": "'||to_char(v_col_date,g_datasource_formats(col))||'"');
                 elsif not g_opt_no_format then
-                  prn(', f: "'||to_char(v_col_date,'yyyy-mm-dd hh24:mi:ss')||'"');	
+                  prn(', "f": "'||to_char(v_col_date,'yyyy-mm-dd hh24:mi:ss')||'"');	
                 end if;
               end if;
           elsif record_desc_table(col).col_type = 187 then
               dbms_sql.column_value(v_cursor, col, v_col_datetime);
               if v_col_datetime is null then
-                prn('v: null');
+                prn('"v": null');
               else
-                prn('v: new Date('||                    
+                prn('"v": new Date('||                    
                     nvl(trim(leading '0' from to_char(v_col_datetime,'yyyy')),'0')	||','||
                     nvl(trim(leading '0' from to_char(v_col_datetime,'mm')),'0')		||','||
                     nvl(trim(leading '0' from to_char(v_col_datetime,'dd')),'0')		||','||
@@ -1914,18 +1914,18 @@ AS
                     nvl(trim(leading '0' from to_char(v_col_datetime,'ff3')),'0')		||')'
                 );
                 if g_datasource_formats(col) is not null and not g_opt_no_format then
-                  prn(', f: "'||to_char(v_col_datetime,g_datasource_formats(col))||'"');
+                  prn(', "f": "'||to_char(v_col_datetime,g_datasource_formats(col))||'"');
                 elsif not g_opt_no_format then
-                  prn(', f: "'||to_char(v_col_datetime,'yyyy-mm-dd hh24:mi:ss')||'"');	
+                  prn(', "f": "'||to_char(v_col_datetime,'yyyy-mm-dd hh24:mi:ss')||'"');	
                 end if;
               end if;
           elsif record_desc_table(col).col_type = 112 then
               -- CLOB
               dbms_sql.column_value(v_cursor, col, v_col_clob);
               if nvl(dbms_lob.GETLENGTH(v_col_clob),0) = 0 or v_col_clob is null then
-                prn('v: null');
+                prn('"v": null');
               else
-                prn('v: "');
+                prn('"v": "');
                 printJsonString(v_col_clob);
                 prn ('"');
               end if;
@@ -2059,17 +2059,17 @@ AS
     end if;
 				
 		p('{');
-		p(' version: "'||g_version||'",');
-		p(' status: "error",');
-		p(' reqId: '||nvl(get_tqx_attr('reqId',tqx),0)||',');
+		p(' "version": "'||g_version||'",');
+		p(' "status": "error",');
+		p(' "reqId": '||nvl(get_tqx_attr('reqId',tqx),0)||',');
 		-- signature ??
 		-- p(' signature: "928347923874923874",');
 		
-		p(' errors: [');
+		p(' "errors": [');
 		
 		if nvl(p_reasons.COUNT,0) = 0 then
 		
-			p('   {reason: "Undefined error in GDataSource package"}');	
+			p('   {"reason": "Undefined error in GDataSource package"}');	
 			
 		else
 		
@@ -2080,16 +2080,16 @@ AS
 				else
 					prn('   {');
 				end if;
-				prn('reason: "');
+				prn('"reason": "');
 					printJsonString(p_reasons(e));
 				prn('"');
 				if p_messages.exists(e) and nvl(length(p_messages(e)),0) > 0 then
-					prn(', message: "');
+					prn(', "message": "');
 						printJsonString(p_messages(e));
 					prn('"');
 				end if;
 				if p_detailed_messages.exists(e) and nvl(length(p_detailed_messages(e)),0) > 0 then
-					prn(', detailed_message: "');
+					prn(', "detailed_message": "');
 						printJsonString(p_detailed_messages(e));
 					prn('"');
 				end if;
